@@ -1,0 +1,18 @@
+// SPDX-License-Identifier: GPL-2.0-or-later OR MIT
+/*
+ * Colibri iMX6ULL 256MB / 512MB IT (raw NAND, no Wi-Fi) on the Diamond Light
+ * Source System Interface Card (drawing 1135557 rev J).
+ *
+ * For the 1GB IT (eMMC) module, include "imx6ull-colibri-emmc-nonwifi.dtsi"
+ * instead. Do not use a Wi-Fi module: SODIMM 89/93/127/138 are not connected.
+ */
+
+/dts-v1/;
+
+#include "imx6ull-colibri-nonwifi.dtsi"
+#include "imx6ull-colibri-diamond-sic.dtsi"
+
+/ {
+	model = "Toradex Colibri iMX6ULL on Diamond System Interface Card";
+	compatible = "toradex,colibri-imx6ull", "fsl,imx6ull";
+};

@@ -1,0 +1,23 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Sudheer <srinet2@gmail.com>
+Date: Mon, 12 Oct 2026 13:32:02 +0100
+Subject: [PATCH] ARM: dts: imx6ull-colibri: add Diamond System Interface Card
+
+Add the device tree for the Colibri iMX6ULL (non-Wi-Fi, raw NAND) on the
+Diamond Light Source System Interface Card, drawing 1135557 rev J.
+Ported from the Colibri VF50 device tree.
+
+Upstream-Status: Inappropriate [board specific]
+---
+diff --git a/arch/arm/boot/dts/nxp/imx/Makefile b/arch/arm/boot/dts/nxp/imx/Makefile
+index 3629e34..3436ba4 100644
+--- a/arch/arm/boot/dts/nxp/imx/Makefile
++++ b/arch/arm/boot/dts/nxp/imx/Makefile
+@@ -316,6 +316,7 @@ dtb-$(CONFIG_SOC_IMX6UL) += \
+ 	imx6ul-tx6ul-mainboard.dtb \
+ 	imx6ull-14x14-evk.dtb \
+ 	imx6ull-colibri-aster.dtb \
++	imx6ull-colibri-diamond-sic.dtb \
+ 	imx6ull-colibri-emmc-aster.dtb \
+ 	imx6ull-colibri-emmc-eval-v3.dtb \
+ 	imx6ull-colibri-emmc-iris.dtb \

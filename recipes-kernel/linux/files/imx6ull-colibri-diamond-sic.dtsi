@@ -1,0 +1,264 @@
+// SPDX-License-Identifier: GPL-2.0-or-later OR MIT
+/*
+ * Diamond Light Source - System Interface Card (SIC), Colibri iMX6ULL build.
+ *
+ * Pin assignments follow drawing 1135557 sheet 7 rev J, "Connector for
+ * computer on a module: Colibri VF50 / IMX6ULL", with the iMX6ULL resistor
+ * options of the "VF50 / IMX6ULL COMPATIBILITY" block fitted
+ * (R133 R136 R141 R143 R146 R148 R151 R153 R156 R158 R160 R162) and the
+ * VF50 options left off (R129 R134 R139 R142 R144 R147 R149 R152 R155 R157
+ * R159 R161).
+ *
+ * Ported from the Colibri VF50 device tree. Each pin is annotated
+ * "SODIMM n: schematic net (VF50 SODIMM/pad)".
+ *
+ * Module: a NON-Wi-Fi Colibri iMX6ULL is required. SODIMM 89, 93, 127 and
+ * 138 are not connected on the Wi-Fi modules.
+ *
+ * Boot straps: SODIMM 105 (FPGA_TYPE_B4) and 127 (SW1-8) are the i.MX
+ * BOOT_MODE0/1 pins with 10k pull-downs on the module. Both must be low when
+ * reset is released.
+ */
+
+#include <dt-bindings/gpio/gpio.h>
+
+/ {
+	chosen {
+		stdout-path = "serial0:115200n8";	/* UART_A, /dev/ttymxc0 */
+	};
+
+	aliases {
+		/*
+		 * Same bus numbers as on the VF50:
+		 * spi0 = SIC SPI (was dspi0), spi1 = DPS SPI (was dspi1).
+		 */
+		spi0 = &ecspi3;
+		spi1 = &ecspi1;
+		/* imx6ul.dtsi also has spi2 = &ecspi3; drop it so ecspi3 has one number */
+		/delete-property/ spi2;
+	};
+
+	/* Carrier 3.3V rail; imx6ull-colibri.dtsi expects every carrier to define it */
+	reg_3v3: regulator-3v3 {
+		compatible = "regulator-fixed";
+		regulator-name = "3.3V";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+	};
+
+	/*
+	 * DPS FPGA programming (was dfl@1, "load_dps").
+	 * Same SODIMM pins on both modules: 98/100/102/104/106.
+	 */
+	load_dps: dfl@1 {
+		compatible = "dls,fpga_loader";
+		dev_name = "load_dps";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_dls_fpga1>;
+		init-gpios = <&gpio4 26 GPIO_ACTIVE_HIGH>;	/* SODIMM 98:  ADC_Init_B_Micro */
+		done-gpios = <&gpio1 26 GPIO_ACTIVE_HIGH>;	/* SODIMM 100: ADC_Done_Micro */
+		prog-gpios = <&gpio1 15 GPIO_ACTIVE_HIGH>;	/* SODIMM 102: ADC_Prog_B_Micro */
+		d0-gpios = <&gpio2 7 GPIO_ACTIVE_HIGH>;		/* SODIMM 104: ADC_DSO_Micro */
+		clk-gpios = <&gpio1 10 GPIO_ACTIVE_HIGH>;	/* SODIMM 106: ADC_Clk_Micro */
+		status = "okay";
+	};
+
+	/*
+	 * SIC FPGA programming (was dfl@2, "load_sic").
+	 * Rev J moves INIT_B/DONE/DSO/CLK from SODIMM 134/136/140/142 (VF50) to
+	 * 46/48/50/52 (iMX6ULL); PROG_B stays on SODIMM 138.
+	 */
+	load_sic: dfl@2 {
+		compatible = "dls,fpga_loader";
+		dev_name = "load_sic";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_dls_fpga2 &pinctrl_snvs_dls_fpga2>;
+		init-gpios = <&gpio3 12 GPIO_ACTIVE_HIGH>;	/* SODIMM 46:  IMX6ULL_Init_B (VF50: 134) */
+		done-gpios = <&gpio3 14 GPIO_ACTIVE_HIGH>;	/* SODIMM 48:  IMX6UL_DONE    (VF50: 136) */
+		prog-gpios = <&gpio5 8 GPIO_ACTIVE_HIGH>;	/* SODIMM 138: Prog_B_Micro_1 (VF50: 138) */
+		d0-gpios = <&gpio3 16 GPIO_ACTIVE_HIGH>;	/* SODIMM 50:  IMX6UL_DSO     (VF50: 140) */
+		clk-gpios = <&gpio3 17 GPIO_ACTIVE_HIGH>;	/* SODIMM 52:  IMX6ULL_CLK    (VF50: 142) */
+		status = "okay";
+	};
+};
+
+/*
+ * PS MEASURE: supply rail monitoring on adc1.
+ *   SODIMM 8  ch0 (in_voltage0_raw) = 1V8
+ *   SODIMM 6  ch1 (in_voltage1_raw) = 3V3 / 2  (R130/R137 1k/1k)
+ *   SODIMM 19 ch4 (in_voltage4_raw) = 1V2      (VF50: SODIMM 59, ADC0_SE2)
+ *   SODIMM 4  ch8 (in_voltage8_raw) = 5V0 / 2  (R131/R138 1k/1k)
+ *   SODIMM 2  ch9 (in_voltage9_raw) = 1V0
+ * SODIMM 19 is UART_C RXD by default; &uart5 must stay disabled.
+ */
+&adc1 {
+	pinctrl-0 = <&pinctrl_adc1 &pinctrl_adc1_vcc1v2>;
+	status = "okay";
+};
+
+/* DPS SPI CTRL (SPI_DPS_*), standard Colibri SPI on SODIMM 86/88/90/92 (was dspi1) */
+&ecspi1 {
+	status = "okay";
+
+	/* /dev/spidev1.0, as on the VF50 */
+	spidev1: spidev@0 {
+		/* "toradex,evalspi" is not accepted by spidev in 6.6 */
+		compatible = "rohm,dh2228fv";
+		reg = <0>;
+		spi-max-frequency = <5000000>;
+		/* was fsl,spi-sck-cs-delay = <80> (Vybrid DSPI only) */
+		spi-cs-hold-delay-ns = <80>;
+	};
+};
+
+/*
+ * SIC SPI CTRL (SPI0_*), Colibri UART_B pins (was dspi0 on SODIMM 43/71/73/77).
+ * Chip select is driven as a GPIO so the SPI core applies the CS hold delay;
+ * R140 10k pulls it up on the carrier.
+ */
+&ecspi3 {
+	cs-gpios = <&gpio1 20 GPIO_ACTIVE_LOW>;		/* SODIMM 36 */
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_ecspi3>;
+	status = "okay";
+
+	/* Was spidev@3 (/dev/spidev0.3); now /dev/spidev0.0 */
+	spidev0: spidev@0 {
+		compatible = "rohm,dh2228fv";
+		reg = <0>;
+		spi-max-frequency = <5000000>;
+		spi-cs-hold-delay-ns = <80>;
+	};
+};
+
+/* Ethernet: on-module PHY, already enabled as &fec2 by the module dtsi (was &fec1). */
+
+/* TEMP SENSOR: AD7414 (U19) on Colibri I2C, SODIMM 194/196 (was &i2c0), /dev/i2c-0 */
+&i2c1 {
+	clock-frequency = <400000>;	/* as on the VF50 */
+	status = "okay";
+
+	temp1: ad7414@48 {
+		compatible = "ad,ad7414";
+		reg = <0x48>;
+	};
+};
+
+/* DBG COLIBRI: serial console on UART_A, SODIMM 33/35 (was &uart0 /dev/ttyLP0) */
+&uart1 {
+	status = "okay";
+};
+
+/*
+ * Pad control translation, Vybrid -> i.MX 6ULL:
+ *   Vybrid OBE=0 ("output disabled")  -> i.MX: GPIO stays an input until the
+ *                                        driver sets it as output (GDIR)
+ *   pull encoding (PUS) is the same      100k PD / 47k PU / 100k PU / 22k PU
+ *   Vybrid DSE 3 (50 ohm)             -> i.MX DSE 5 (~52 ohm @3.3V)
+ * i.MX bits: HYS 0x10000, PUS 0xc000, PUE 0x2000, PKE 0x1000, SPEED 0xc0,
+ *            DSE 0x38, SRE 0x1
+ *
+ *   VF50 value  meaning                          iMX6ULL value
+ *   0x0201      input, Schmitt                   0x10000
+ *   0x0001      input                            0x0
+ *   0x122D      input, Schmitt, 100k PU          0x1b080
+ *   0x0000      in + out disabled (spare)        0x0
+ *   0x00ed      100k PU, 50 ohm when output      0xb028
+ *   0x00c1      50 ohm when output               0x0028
+ *   0x00cd      100k PD, 50 ohm when output      0x3028
+ */
+&iomuxc {
+	/* Replaces the module's default GPIO hogs (as the VF50 file did) */
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_sic_hog>;
+
+	pinctrl_sic_hog: sichoggrp {
+		fsl,pins = <
+			/* TRIG IN */
+			MX6UL_PAD_ENET1_RX_DATA0__GPIO2_IO00	0x10000	/* SODIMM 55:  XL_TRIG_IN,  gpio2 0  */
+			/* OLD VS NEW SIC (new in rev J; level depends on SIC issue) */
+			MX6UL_PAD_CSI_DATA04__GPIO4_IO25	0x10000	/* SODIMM 69:  SIC_VER,     gpio4 25 */
+			/* FPGA VER CTRL switches (SW1-8 and SW1-2 are in &iomuxc_snvs) */
+			MX6UL_PAD_GPIO1_IO02__GPIO1_IO02	0x0	/* SODIMM 129: SW1-4,       gpio1 2  */
+			MX6UL_PAD_NAND_CE1_B__GPIO4_IO14	0x0	/* SODIMM 133: SW1-1,       gpio4 14 */
+			/* FPGA VER TYPE (B2..B5 are in &iomuxc_snvs) */
+			MX6UL_PAD_GPIO1_IO03__GPIO1_IO03	0x1b080	/* SODIMM 89:  FPGA_TYPE_B1, gpio1 3 */
+			/* SPARE TO DPS */
+			MX6UL_PAD_JTAG_TCK__GPIO1_IO14		0x0	/* SODIMM 99:  SPARE6,  gpio1 14 (VF50: 99)  */
+			MX6UL_PAD_LCD_DATA13__GPIO3_IO18	0x0	/* SODIMM 54:  SPARE7,  gpio3 18 (VF50: 144) */
+			MX6UL_PAD_LCD_DATA03__GPIO3_IO08	0x0	/* SODIMM 58:  SPARE8,  gpio3 8  (VF50: 146) */
+			MX6UL_PAD_UART3_RTS_B__GPIO1_IO27	0x0	/* SODIMM 186: SPARE9,  gpio1 27 (VF50: 184) */
+			/* TEMP SENSOR alert */
+			MX6UL_PAD_ENET1_TX_DATA0__GPIO2_IO03	0x10000	/* SODIMM 188: TEMP_ALRT,   gpio2 3  */
+		>;
+	};
+
+	pinctrl_adc1_vcc1v2: adc1vcc1v2grp {
+		fsl,pins = <
+			MX6UL_PAD_GPIO1_IO04__GPIO1_IO04	0x3000	/* SODIMM 19: IMX6FULL_VCC1V2 (ADC1_IN4) */
+		>;
+	};
+
+	pinctrl_ecspi3: ecspi3grp {
+		fsl,pins = <
+			MX6UL_PAD_UART2_CTS_B__ECSPI3_MOSI	0x000a0	/* SODIMM 32: iMX6ULL_SPI13_MOSI */
+			MX6UL_PAD_UART2_RTS_B__ECSPI3_MISO	0x100a0	/* SODIMM 34: iMX6ULL_SPI13_MISO */
+			MX6UL_PAD_UART2_TX_DATA__GPIO1_IO20	0x000a0	/* SODIMM 36: iMX6ULL_SPI13_CS   */
+			MX6UL_PAD_UART2_RX_DATA__ECSPI3_SCLK	0x000a0	/* SODIMM 38: iMX6ULL_SPI13_CLK  */
+		>;
+	};
+
+	pinctrl_dls_fpga1: dlsfpga1grp {
+		fsl,pins = <
+			/* DPS FPGA PROG */
+			MX6UL_PAD_CSI_DATA05__GPIO4_IO26	0x0	/* SODIMM 98:  ADC_Init_B_Micro */
+			MX6UL_PAD_UART3_CTS_B__GPIO1_IO26	0x0	/* SODIMM 100: ADC_Done_Micro   */
+			MX6UL_PAD_JTAG_TRST_B__GPIO1_IO15	0xb028	/* SODIMM 102: ADC_Prog_B_Micro */
+			MX6UL_PAD_ENET1_RX_ER__GPIO2_IO07	0x0028	/* SODIMM 104: ADC_DSO_Micro    */
+			MX6UL_PAD_JTAG_MOD__GPIO1_IO10		0x3028	/* SODIMM 106: ADC_Clk_Micro    */
+		>;
+	};
+
+	pinctrl_dls_fpga2: dlsfpga2grp {
+		fsl,pins = <
+			/* SIC FPGA PROG (PROG_B is in &iomuxc_snvs) */
+			MX6UL_PAD_LCD_DATA07__GPIO3_IO12	0x0		/* SODIMM 46: IMX6ULL_Init_B */
+			MX6UL_PAD_LCD_DATA09__GPIO3_IO14	0x0		/* SODIMM 48: IMX6UL_DONE    */
+			MX6UL_PAD_LCD_DATA11__GPIO3_IO16	0x0028	/* SODIMM 50: IMX6UL_DSO     */
+			MX6UL_PAD_LCD_DATA12__GPIO3_IO17	0x3028	/* SODIMM 52: IMX6ULL_CLK    */
+		>;
+	};
+};
+
+/* IMPORTANT: Pin 46 is part of the standard LCD display interface. */
+/* You MUST disable the lcdif node to prevent a resource conflict. */
+&lcdif {
+    status = "disabled";
+};
+
+&iomuxc_snvs {
+	/* Replaces the module's default SNVS GPIO hogs */
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_snvs_sic_hog>;
+
+	pinctrl_snvs_sic_hog: snvssichoggrp {
+		fsl,pins = <
+			/* FPGA VER CTRL switches */
+			/* BOOT STRAP: must be low when reset is released (10k PD on module) */
+			MX6ULL_PAD_BOOT_MODE1__GPIO5_IO11	0x0	/* SODIMM 127: SW1-8,        gpio5 11 */
+			MX6ULL_PAD_SNVS_TAMPER5__GPIO5_IO05	0x0	/* SODIMM 131: SW1-2,        gpio5 5  */
+			/* FPGA VER TYPE */
+			MX6ULL_PAD_SNVS_TAMPER6__GPIO5_IO06	0x1b080	/* SODIMM 93:  FPGA_TYPE_B2, gpio5 6  */
+			MX6ULL_PAD_SNVS_TAMPER3__GPIO5_IO03	0x1b080	/* SODIMM 95:  FPGA_TYPE_B3, gpio5 3  */
+			/* BOOT STRAP: the 10k module pull-down overrides this 100k pull-up */
+			MX6ULL_PAD_BOOT_MODE0__GPIO5_IO10	0x1b080	/* SODIMM 105: FPGA_TYPE_B4, gpio5 10 */
+			MX6ULL_PAD_SNVS_TAMPER4__GPIO5_IO04	0x1b080	/* SODIMM 107: FPGA_TYPE_B5, gpio5 4  */
+		>;
+	};
+
+	pinctrl_snvs_dls_fpga2: snvsdlsfpga2grp {
+		fsl,pins = <
+			MX6ULL_PAD_SNVS_TAMPER8__GPIO5_IO08	0xb028	/* SODIMM 138: Prog_B_Micro_1 */
+		>;
+	};
+};
