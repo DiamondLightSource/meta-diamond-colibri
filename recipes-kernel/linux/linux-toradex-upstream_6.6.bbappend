@@ -1,14 +1,16 @@
 # Add the Diamond System Interface Card device tree
 # (imx6ull-colibri-diamond-sic.dts/.dtsi + Makefile entry) to the kernel.
+# Follows Toradex guide found here:
+# https://developer.toradex.com/linux-bsp/os-development/build-yocto/custom-meta-layers-recipes-and-images-in-yocto-project-hello-world-examples/#add-a-custom-device-tree
 FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 
 
 SRC_URI:append = " \
     file://0001-ARM-dts-imx6ull-colibri-add-Diamond-SIC.patch \
-    file://imx6ull-colibri-diamond-sic.dts \
-    file://imx6ull-colibri-diamond-sic.dtsi \
+    file://${DIAMOND_DEVICETREE_SRC} \
+    file://${DIAMOND_DEVICETREE_SRC}i \
 "
 
 do_configure:append() {
-    cp ${WORKDIR}/imx6ull-colibri-diamond-sic.dts* ${S}/arch/arm/boot/dts/nxp/imx/
+    cp ${WORKDIR}/${DIAMOND_DEVICETREE_SRC}* ${S}/arch/arm/boot/dts/
 }
