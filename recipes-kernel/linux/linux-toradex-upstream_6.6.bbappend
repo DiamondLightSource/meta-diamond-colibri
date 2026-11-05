@@ -6,11 +6,10 @@ FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 
 
 SRC_URI:append = " \
-    file://0001-ARM-dts-imx6ull-colibri-add-Diamond-SIC.patch \
     file://${DIAMOND_DEVICETREE_SRC} \
     file://${DIAMOND_DEVICETREE_SRC}i \
 "
 
 do_configure:append() {
-    cp ${WORKDIR}/${DIAMOND_DEVICETREE_SRC}* ${S}/arch/arm/boot/dts/
+    cp ${WORKDIR}/${DIAMOND_DEVICETREE_SRC}* ${S}/arch/arm/boot/dts/nxp/imx/
 }
