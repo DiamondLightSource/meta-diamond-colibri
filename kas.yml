@@ -1,0 +1,96 @@
+header:
+  version: 23
+# The machine as it is written into the `local.conf` of bitbake.
+machine: colibri-imx6ull
+# The distro name as it is written into the `local.conf` of bitbake.
+distro: poky
+repos:
+  # This entry causes this repo to be added as an additional layer
+  # into bblayers.conf
+  meta-diamond-colibri:
+
+  meta-arm:
+    url: "https://git.yoctoproject.org/meta-arm"
+    commit: 23b572c40ea6709ab3f8bd7abbb5a795fc3631c2
+    path: layers/meta-arm
+    layers:
+      meta-arm:
+      meta-arm-toolchain:
+
+  meta-freescale:
+    url: "https://github.com/Freescale/meta-freescale.git"
+    commit: b699d026506a6fc402e03afb432dcabd3d81c7ab
+    path: layers/meta-freescale
+
+  meta-freescale-3rdparty:
+    url: "https://github.com/Freescale/meta-freescale-3rdparty.git"
+    commit: ce10c065119c2d4e359235c77aae7e0d843533ef
+    path: layers/meta-freescale-3rdparty
+
+  meta-freescale-distro:
+    url: "https://github.com/Freescale/meta-freescale-distro.git"
+    commit: b9d6a5d9931922558046d230c1f5f4ef6ee72345
+    path: layers/meta-freescale-distro
+
+  meta-openembedded:
+    url: "https://github.com/openembedded/meta-openembedded.git"
+    commit: b0c2c648a1af89e7a8dd4c2ec841f3bc0ed0ccb9
+    path: layers/meta-openembedded
+    layers:
+      meta-filesystems:
+      meta-networking:
+      meta-multimedia:
+      meta-oe:
+      meta-python:
+
+  meta-qt5:
+    url: "https://github.com/meta-qt5/meta-qt5.git"
+    commit: 227cf5e7b64c93dfc1a45f235c466db8c3fd8707
+    path: layers/meta-qt5
+
+  meta-ti:
+    url: "https://git.yoctoproject.org/meta-ti"
+    commit: 7ff810824442c56ef59fa2d705d64a03ade5f5f7
+    path: layers/meta-ti
+    layers:
+      meta-ti-bsp:
+      meta-ti-extras:
+
+  meta-toradex-bsp-common:
+    url: "https://git.toradex.com/meta-toradex-bsp-common.git"
+    commit: 0fa5efea03f13fe36fdedab229ff6a176a4b971d
+    path: layers/meta-oradex-bsp-common
+
+  meta-toradex-demos:
+    url: "https://git.toradex.com/meta-toradex-demos.git"
+    commit: 28b67de839fd5cb32da42b65a8a700781fb72144
+    path: layers/meta-toradex-demos
+
+  meta-toradex-distro:
+    url: "https://git.toradex.com/meta-toradex-distro.git"
+    commit: c64f24727eaa741c2546bcf03bac5411e8a2f993
+    path: layers/meta-toradex-distro
+
+  meta-toradex-nxp:
+    url: "https://git.toradex.com/meta-toradex-nxp.git"
+    commit: be776fb39f2c325161821d470c231d48dc7a159d
+    path: layers/meta-toradex-nxp
+
+  meta-toradex-ti:
+    url: "https://git.toradex.com/meta-toradex-ti.git"
+    commit: 23f9c0136942aa77514b0b90ade7c0551be4e398
+    path: layers/meta-toradex-ti
+
+  meta-yocto:
+    url: "https://git.yoctoproject.org/meta-yocto"
+    commit: ca5a51aadaf651881d640688dc3e1e123aa30bf6
+    path: layers/meta-yocto
+    layers:
+      meta-poky:
+
+  openembedded-core:
+    url: "https://github.com/openembedded/openembedded-core.git"
+    commit: 737293bead3e7b994347e47f09bc69437479d50c
+    path: layers/openembedded-core
+    layers:
+      meta:
