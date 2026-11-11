@@ -62,7 +62,7 @@ repos:
   meta-toradex-bsp-common:
     url: "https://git.toradex.com/meta-toradex-bsp-common.git"
     commit: 0fa5efea03f13fe36fdedab229ff6a176a4b971d
-    path: layers/meta-oradex-bsp-common
+    path: layers/meta-toradex-bsp-common
 
   meta-toradex-demos:
     url: "https://git.toradex.com/meta-toradex-demos.git"
