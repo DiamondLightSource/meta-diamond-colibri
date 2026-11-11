@@ -7,6 +7,8 @@ machine: colibri-imx6ull
 # on the original Yocto build
 distro: tdx-xwayland-upstream
 
+target: diamond-imx6ull-colibri-image
+
 repos:
   # This entry causes this repo to be added as an additional layer
   # into bblayers.conf
