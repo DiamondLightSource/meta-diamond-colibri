@@ -3,7 +3,10 @@ header:
 # The machine as it is written into the `local.conf` of bitbake.
 machine: colibri-imx6ull
 # The distro name as it is written into the `local.conf` of bitbake.
-distro: poky
+# This was found by running "bitbake-getvar -r diamond-imx6ull-colibri-image DISTRO"
+# on the original Yocto build
+distro: tdx-xwayland-upstream
+
 repos:
   # This entry causes this repo to be added as an additional layer
   # into bblayers.conf
