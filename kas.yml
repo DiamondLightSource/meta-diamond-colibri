@@ -61,6 +61,13 @@ repos:
     commit: 227cf5e7b64c93dfc1a45f235c466db8c3fd8707
     path: layers/meta-qt5
 
+  meta-security:
+    url: "https://git.yoctoproject.org/meta-security"
+    commit: "b13f1705d723650de61277670c8a76aadea4cfdd"
+    path: layers/meta-security
+    layers:
+      meta-tpm:
+
   meta-ti:
     url: "https://git.yoctoproject.org/meta-ti"
     commit: 7ff810824442c56ef59fa2d705d64a03ade5f5f7
