@@ -10,6 +10,10 @@ SRC_URI:append = " \
     file://${DIAMOND_DEVICETREE_SRC}i \
 "
 
+
 do_configure:append() {
     cp ${WORKDIR}/${DIAMOND_DEVICETREE_SRC}* ${S}/arch/arm/boot/dts/nxp/imx/
+    if ! grep -q "${DIAMOND_DEVICETREE_BIN}" ${S}/arch/arm/boot/dts/nxp/imx/Makefile; then
+        sed -i '/imx6ull-colibri-eval-v3.dtb/a \\t'"${DIAMOND_DEVICETREE_BIN}"' \\' ${S}/arch/arm/boot/dts/nxp/imx/Makefile
+    fi
 }

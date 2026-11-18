@@ -9,6 +9,13 @@ distro: tdx-xwayland-upstream
 
 target: diamond-imx6ull-colibri-image
 
+local_conf_header:
+  meta-diamond-colibri: |
+    PREFERRED_PROVIDER_virtual/kernel:colibri-imx6ull = "linux-toradex-upstream"
+    PREFERRED_PROVIDER_virtual/kernel:use-mainline-bsp = "linux-toradex-upstream"
+    PREFERRED_VERSION_linux-toradex-upstream = "6.6%"
+    ACCEPT_FSL_EULA = "1"
+
 repos:
   # This entry causes this repo to be added as an additional layer
   # into bblayers.conf
@@ -63,7 +70,7 @@ repos:
 
   meta-security:
     url: "https://git.yoctoproject.org/meta-security"
-    commit: "b13f1705d723650de61277670c8a76aadea4cfdd"
+    commit: b13f1705d723650de61277670c8a76aadea4cfdd
     path: layers/meta-security
     layers:
       meta-tpm:
