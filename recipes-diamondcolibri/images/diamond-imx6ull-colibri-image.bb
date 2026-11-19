@@ -45,3 +45,7 @@ IMAGE_INSTALL += " \
 # kernel-module-dls-fpga-loader
 
 IMAGE_FSTYPES = "ubifs"
+
+# The ubifs image type doesn't pull in the bootloader's do_deploy, so without
+# this u-boot.imx / u-boot-nand.imx are never (re)deployed by an image build.
+EXTRA_IMAGEDEPENDS += "virtual/bootloader:do_deploy"
