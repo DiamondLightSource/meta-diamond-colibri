@@ -1,3 +1,8 @@
+FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
+
+# Increase autoboot delay from the defconfig default of 1 second
+SRC_URI += "file://bootdelay.cfg"
+
 do_configure:append() {
     # Remove existing fdtfile, if present
     sed -i '/"fdtfile=.*\\0" \\/d' ${S}/include/configs/colibri-imx6ull.h
