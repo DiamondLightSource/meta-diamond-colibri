@@ -35,7 +35,7 @@ When the build finishes the built files will be found in `build/tmp/deploy/image
 
 - `zImage`
 - `imx6ull-colibri-diamond-sic.dtb`
-- `u-boot.imx`
+- `u-boot-nand.imx`
 - `colibri-imx6ull_Diamond-Image-upstream.ubifs`
 
 
@@ -43,7 +43,7 @@ When the build finishes the built files will be found in `build/tmp/deploy/image
 
 ## Using TFTP
 
-- Put files into TFTP area: `cp zImage imx6ull-colibri-diamond-sic.dtb u-boot.imx colibri-imx6ull_Diamond-Image-upstream.ubifs /dls_sw/work/tftpboot/dev/colibri-imx6ull/`
+- Put files into TFTP area: `cp zImage imx6ull-colibri-diamond-sic.dtb u-boot-nand.imx colibri-imx6ull_Diamond-Image-upstream.ubifs /dls_sw/work/tftpboot/dev/colibri-imx6ull/`
 - `telnet` to the iMX6ULL, and get into UBoot prompt by interrupting autoboot
 - Set up environment to point to tftp server:
 ```
@@ -62,7 +62,7 @@ env save
 - `ubi write $loadaddr rootfs $filesize`
 - `tftpboot $loadaddr colibri-imx6ull/imx6ull-colibri-diamond-sic.dtb`
 - `ubi write $loadaddr dtb $filesize`
-- `tftpboot $loadaddr colibri-imx6ull/u-boot.imx`
+- `tftpboot $loadaddr colibri-imx6ull/u-boot-nand.imx`
 - `nand erase.part u-boot1`
 - `nand write ${loadaddr} u-boot1 ${filesize}`
 - `nand erase.part u-boot2`
